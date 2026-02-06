@@ -1,4 +1,4 @@
-const responses = {
+export const responses = {
     success: (data: any)=>{
         return {
             "success": true,
