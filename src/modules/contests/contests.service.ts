@@ -1,5 +1,5 @@
 import {prisma} from "../../db/prisma.ts"
-import type { CreateContestsSchemaType } from "./contests.validateSchema"
+import type { CreateContestsSchemaType, McqCreationsSchemaType } from "./contests.validateSchema"
 
 export const CreateContestService = async (data: CreateContestsSchemaType, userId: string)=>{
     try {
@@ -61,6 +61,39 @@ export const getContestDetailsService = async (contestId: string)=>{
             }
 
             return contest
+    } catch (error) {
+        throw error
+    }
+}
+
+export const addMcqToContestService = async (contestId: string, data: McqCreationsSchemaType)=>{
+    try {
+        const {
+            questionText,
+            options,
+            correctOptionIndex,
+            points
+        } = data
+
+        const mcq = await prisma.mcqQuestions.create({
+            data: {
+                contest_id: contestId,
+                question_text: questionText,
+                options: options,
+                correct_option_index: correctOptionIndex,
+                points: points
+            },
+            select: {
+                id: true,
+                contest_id: true
+            }
+        })
+
+        if(!mcq){
+            throw new Error("CONTEST_NOT_FOUND")
+        }
+
+        return mcq
     } catch (error) {
         throw error
     }
