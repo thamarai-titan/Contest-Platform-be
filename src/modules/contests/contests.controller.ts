@@ -9,6 +9,7 @@ import {
     addMcqToContestService,
   CreateContestService,
   getContestDetailsService,
+  submitMcq,
 } from "./contests.service";
 import { responses } from "../../utils/responses";
 
@@ -16,6 +17,10 @@ type Params = {
   contestId: string;
 };
 
+type SubmitParams = {
+    contestId: string,
+    questionId: string
+}
 export const CreateContestController = async (req: Request, res: Response) => {
   try {
     const data: CreateContestsSchemaType = CreateContestsSchema.parse(req.body);
@@ -39,10 +44,10 @@ export const CreateContestController = async (req: Request, res: Response) => {
     );
   } catch (error: any) {
     if (error.name === "ZodError") {
-      res.status(400).json(responses.error("INVALID_REQUEST"));
+      return res.status(400).json(responses.error("INVALID_REQUEST"));
     }
 
-    res.status(400).json(responses.error("INTERNAL_SERVER_ERROR"));
+    return res.status(500).json(responses.error("INTERNAL_SERVER_ERROR"));
   }
 };
 
@@ -90,7 +95,7 @@ export const getContestDetailsController = async (
       return res.status(404).json(responses.error("CONTEST_NOT_FOUND"));
     }
 
-    res.status(400).json(responses.error("INTERNAL_SERVER_ERROR"));
+    return res.status(500).json(responses.error("INTERNAL_SERVER_ERROR"));
   }
 };
 
@@ -116,6 +121,38 @@ export const addMcqToContestController = async (req: Request<Params>, res: Respo
         if(error.message === "CONTEST_NOT_FOUND"){
             return res.status(404).json(responses.error("CONTEST_NOT_FOUND"))
         }
-        res.status(400).json(responses.error("INTERNEL_SERVER_ERROR"))
+        return res.status(500).json(responses.error("INTERNEL_SERVER_ERROR"))
+    }
+}
+
+
+export const submitMcqController = async (req: Request<SubmitParams>, res: Response) => {
+    try {
+        const {
+            questionId
+        } = req.params
+
+        const selectedIndex: number = req.body
+        const userId = req.userId
+
+        const submission = await submitMcq(userId, questionId, selectedIndex)
+
+        res.status(201).json(responses.success({
+            isCorrect: submission.is_correct,
+            pointsEarned: submission.points_earned
+        }))
+
+    } catch (error: any) {
+        if(error.message === "ALREADY_SUBMITTED"){
+            return res.status(400).json(responses.error("ALREADY_SUBMITTED"))
+        }
+        if(error.message === "CONTEST_NOT_ACTIVE"){
+            return res.status(400).json(responses.error("CONTEST_NOT_ACTIVE"))
+        }
+        if(error.message === "QUESTION_NOT_FOUND"){
+            return res.status(404).json(responses.error("QUESTION_NOT_FOUND"))
+        }
+
+        return res.status(500).json(responses.error("INTERNEL_SERVER_ERROR"))
     }
 }
