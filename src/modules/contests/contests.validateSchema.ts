@@ -11,3 +11,12 @@ export type CreateContestsSchemaType = z.infer<typeof CreateContestsSchema>
 
 
 
+export const McqCreationSchema = z.object({
+    questionText: z.string().min(3, "must need a question text"),
+    options: z.string().array(),
+    correctOptionIndex: z.number(),
+    points: z.number()
+})
+
+export type McqCreationsSchemaType = z.infer<typeof McqCreationSchema>
+
