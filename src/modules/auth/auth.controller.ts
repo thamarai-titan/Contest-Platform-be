@@ -14,7 +14,7 @@ export const SignupController = async (req: Request, res: Response) => {
         const isEmailAlreadyExists = await checkEmail(data.email)
 
         if(isEmailAlreadyExists){
-            res.status(400).json(responses.error("EMAIL_ALREADY_EXISTS"))
+            return res.status(400).json(responses.error("EMAIL_ALREADY_EXISTS"))
         }
 
         const user = await SignupService(data)
@@ -29,10 +29,10 @@ export const SignupController = async (req: Request, res: Response) => {
     } catch (error: any) {
         if(error.name === "ZodError")
         {
-            res.status(400).json(responses.error("INVALID_REQUEST"))
+            return res.status(400).json(responses.error("INVALID_REQUEST"))
         }
 
-        res.status(400).json(responses.error("ERROR IN THE SERVER"))
+        return res.status(400).json(responses.error("ERROR IN THE SERVER"))
     }
 
 }
@@ -65,6 +65,6 @@ export const SigninController = async (req: Request, res: Response) => {
             res.status(401).json(responses.error("NO_USER_FOUND"))
         }
 
-        res.status(400).json(responses.error("INTERNAL SERVER ERROR"))
+        return res.status(400).json(responses.error("INTERNAL SERVER ERROR"))
     }
 }
