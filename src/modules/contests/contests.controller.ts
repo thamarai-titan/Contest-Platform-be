@@ -1,9 +1,12 @@
 import type { Request, Response } from "express";
 import {
   CreateContestsSchema,
+  McqCreationSchema,
   type CreateContestsSchemaType,
+  type McqCreationsSchemaType,
 } from "./contests.validateSchema";
 import {
+    addMcqToContestService,
   CreateContestService,
   getContestDetailsService,
 } from "./contests.service";
@@ -52,9 +55,6 @@ export const getContestDetailsController = async (
 
     const contest = await getContestDetailsService(contestId);
 
-    if (!contest) {
-      res.status(404).json(responses.error("CONTEST_NOT_FOUND"));
-    }
 
     const mcqsmap = contest.mcq_questions.map((data) => ({
       id: data.id,
@@ -87,9 +87,35 @@ export const getContestDetailsController = async (
     );
   } catch (error: any) {
     if (error.message === "CONTEST_NOT_FOUND") {
-      res.status(404).json(responses.error("CONTEST_NOT_FOUND"));
+      return res.status(404).json(responses.error("CONTEST_NOT_FOUND"));
     }
 
     res.status(400).json(responses.error("INTERNAL_SERVER_ERROR"));
   }
 };
+
+
+export const addMcqToContestController = async (req: Request<Params>, res: Response)=>{
+    try {
+        const data: McqCreationsSchemaType = McqCreationSchema.parse(req.body)
+        
+        const { contestId } = req.params
+
+        const mcq = await addMcqToContestService(contestId, data)
+
+        res.status(201).json(responses.success({
+            id: mcq.id,
+            contestId: mcq.contest_id
+        }))
+    } 
+    catch (error: any) {
+        if(error.name === "ZodError"){
+            return res.status(400).json(responses.error("INVALID_REQUEST"))
+        }
+
+        if(error.message === "CONTEST_NOT_FOUND"){
+            return res.status(404).json(responses.error("CONTEST_NOT_FOUND"))
+        }
+        res.status(400).json(responses.error("INTERNEL_SERVER_ERROR"))
+    }
+}
