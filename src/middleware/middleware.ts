@@ -46,7 +46,7 @@ export const requireCreator = (req:Request, res:Response, next:NextFunction) => 
 
 
 export const requireConteste = (req:Request, res:Response, next:NextFunction) => {
-    if(req.role !== "conteste"){ 
+    if(req.role !== "contestee"){ 
         return res.status(403).json(responses.error("FORBIDDEN"))
     }
     next()
