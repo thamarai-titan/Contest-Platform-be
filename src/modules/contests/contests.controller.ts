@@ -12,6 +12,7 @@ import {
     addMcqToContestService,
   CreateContestService,
   getContestDetailsService,
+  getDsaProblemsService,
   submitMcq,
 } from "./contests.service";
 import { responses } from "../../utils/responses";
@@ -24,6 +25,11 @@ type SubmitParams = {
     contestId: string,
     questionId: string
 }
+
+type ProblemParams = {
+  problemId: string
+}
+
 export const CreateContestController = async (req: Request, res: Response) => {
   try {
     const data: CreateContestsSchemaType = CreateContestsSchema.parse(req.body);
@@ -164,7 +170,7 @@ export const addDsqController = async (req: Request<Params>, res: Response)=>{
   try {
     const { contestId } = req.params
     const data: DsaCreationSchemaType = DsaCreationSchema.parse(req.body)
-    
+
     const dsa = await addDsaService(data, contestId)
 
     res.status(201).json(responses.success({
@@ -180,6 +186,35 @@ export const addDsqController = async (req: Request<Params>, res: Response)=>{
       return res.status(404).json(responses.error("CONTEST_NOT_FOUND"))
     }
 
+    res.status(500).json(responses.error("INTERNAL_SERVER_ERROR"))
+  }
+}
+
+export const getDsaProblemsController = async (req: Request<ProblemParams>, res: Response)=>{
+  try {
+      const { problemId } = req.params
+      const dsa = await getDsaProblemsService(problemId)
+
+      const visibletestcasedata = dsa.test_cases.map(data => ({
+        input: data.input,
+        expectedOutput: data.expected_output
+      }))
+
+      res.status(200).json(responses.success({
+        id: dsa.id,
+        contestId: dsa.contest_id,
+        title: dsa.title,
+        description: dsa.description,
+        tage: dsa.tags,
+        points: dsa.points,
+        timeLimit: dsa.time_limit,
+        memoryLimit: dsa.memory_limit,
+        visibleTestCases: visibletestcasedata
+      }))
+  } catch (error: any) {
+    if(error.message === "PROBLEM_NOT_FOUND"){
+      return res.status(404).json(responses.error("PROBLEM_NOT_FOUND"))
+    }
     res.status(500).json(responses.error("INTERNAL_SERVER_ERROR"))
   }
 }
