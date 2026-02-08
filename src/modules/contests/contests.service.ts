@@ -1,6 +1,7 @@
 import { prisma } from "../../db/prisma.ts";
 import type {
   CreateContestsSchemaType,
+  DsaCreationSchemaType,
   McqCreationsSchemaType,
 } from "./contests.validateSchema";
 
@@ -137,18 +138,71 @@ export const submitMcq = async (
     if (mcq.mcq_submissions.length > 0) {
       throw new Error("ALREADY_SUBMITTED");
     }
-    const isCorrect = (selectedIndex === mcq.correct_option_index)
+    const isCorrect = selectedIndex === mcq.correct_option_index;
     const submission = await prisma.mcqSubmissions.create({
-        data: {
-            selected_option_index: selectedIndex,
-            question_id: questionId,
-            user_id: userId,
-            is_correct: isCorrect,
-            points_earned: 1
-        }
-    })
+      data: {
+        selected_option_index: selectedIndex,
+        question_id: questionId,
+        user_id: userId,
+        is_correct: isCorrect,
+        points_earned: 1,
+      },
+    });
 
-    return submission
+    return submission;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const addDsaService = async (data: DsaCreationSchemaType, contestId: string) => {
+  try {
+      const {
+        title,
+        description,
+        tags,
+        points,
+        timeLimit,
+        memoryLimit,
+        testCases
+      } = data
+
+      const contest_id = await prisma.contests.findUnique({
+        where: {
+          id: contestId
+        },
+        select: {
+          id: true
+        }
+      })
+
+      if(!contest_id){
+        throw new Error("CONTEST_NOT_FOUND")
+      }
+
+      const dsa = await prisma.dsaProblems.create({
+        data: {
+          contest_id: contest_id.id,
+          title,
+          description,
+          tags,
+          points,
+          time_limit: timeLimit,
+          memory_limit: memoryLimit,
+          test_cases: {
+            create:testCases.map(tc => ({
+              input: tc.input,
+              expected_output: tc.expectedOutput,
+              is_hidden: tc.isHidden
+            }))   
+          }
+        },
+        select: {
+          id: true,
+          contest_id: true
+        }
+      })
+      return dsa
   } catch (error) {
     throw error
   }
