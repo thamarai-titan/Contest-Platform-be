@@ -1,11 +1,14 @@
 import type { Request, Response } from "express";
 import {
   CreateContestsSchema,
+  DsaCreationSchema,
   McqCreationSchema,
   type CreateContestsSchemaType,
+  type DsaCreationSchemaType,
   type McqCreationsSchemaType,
 } from "./contests.validateSchema";
 import {
+  addDsaService,
     addMcqToContestService,
   CreateContestService,
   getContestDetailsService,
@@ -155,4 +158,28 @@ export const submitMcqController = async (req: Request<SubmitParams>, res: Respo
 
         return res.status(500).json(responses.error("INTERNEL_SERVER_ERROR"))
     }
+}
+
+export const addDsqController = async (req: Request<Params>, res: Response)=>{
+  try {
+    const { contestId } = req.params
+    const data: DsaCreationSchemaType = DsaCreationSchema.parse(req.body)
+    
+    const dsa = await addDsaService(data, contestId)
+
+    res.status(201).json(responses.success({
+      id: dsa.id,
+      contestId: dsa.contest_id
+    }))
+  } catch (error: any) {
+    if(error.name === "ZodError"){
+      return res.status(400).json(responses.error("INVALID_REQUEST"))
+    }
+
+    if(error.message === "CONTEST_NOT_FOUND"){
+      return res.status(404).json(responses.error("CONTEST_NOT_FOUND"))
+    }
+
+    res.status(500).json(responses.error("INTERNAL_SERVER_ERROR"))
+  }
 }
