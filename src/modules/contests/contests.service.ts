@@ -207,3 +207,29 @@ export const addDsaService = async (data: DsaCreationSchemaType, contestId: stri
     throw error
   }
 };
+
+
+export const getDsaProblemsService = async (problemId: string)=>{
+  try {
+    const dsa = await prisma.dsaProblems.findUnique({
+      where: {
+        id: problemId
+      },
+      include: {
+        test_cases: {
+          where: {
+            is_hidden: true
+          }
+        }
+      },
+    })
+
+    if(!dsa){
+      throw new Error("PROBLEM_NOT_FOUND")
+    }
+
+    return dsa
+  } catch (error) {
+    throw error
+  }
+}
