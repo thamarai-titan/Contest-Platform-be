@@ -38,3 +38,10 @@ export const DsaCreationSchema = z.object({
 
 export type DsaCreationSchemaType = z.infer<typeof DsaCreationSchema>
 export type testCaseArraySchemaType = z.infer<typeof testCaseArraySchema>
+
+export const submitDsaService = z.object({
+    code: z.string().min(5, "must the full code needed"),
+    language: z.string().min(1, "language must needed to give")
+})
+
+export type submitDsaServiceType = z.infer<typeof submitDsaService>
