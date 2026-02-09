@@ -218,3 +218,12 @@ export const getDsaProblemsController = async (req: Request<ProblemParams>, res:
     res.status(500).json(responses.error("INTERNAL_SERVER_ERROR"))
   }
 }
+
+
+export const submitDsaController = async (req: Request, res: Response)=>{
+  try {
+    
+  } catch (error) {
+    
+  }
+}
