@@ -3,6 +3,7 @@ import type {
   CreateContestsSchemaType,
   DsaCreationSchemaType,
   McqCreationsSchemaType,
+  submitDsaServiceType,
 } from "./contests.validateSchema";
 
 export const CreateContestService = async (
@@ -231,5 +232,13 @@ export const getDsaProblemsService = async (problemId: string)=>{
     return dsa
   } catch (error) {
     throw error
+  }
+}
+
+export const submitDsaService = async (data: submitDsaServiceType, problemId: string)=>{
+  try {
+    
+  } catch (error) {
+    
   }
 }
