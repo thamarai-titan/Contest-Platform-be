@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY runner.ts .
 
-CMD ["bun run", "runner.ts"]
+CMD ["node", "runner.js"]
